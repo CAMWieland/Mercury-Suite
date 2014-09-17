@@ -1,0 +1,42 @@
+
+ WARNING: Truncating the name of this object to 8 characters:  TEST_PARTICLE
+
+           Integration parameters
+           ----------------------
+
+   Algorithm: Hybrid symplectic integrator (mixed coordinates)
+
+   Integration start epoch:               0.0000000 days 
+   Integration stop  epoch:     12000000000.0000000
+   Output interval:                  200000.000
+   Output precision:                 low
+
+   Initial timestep:              100.000 days 
+   Accuracy parameter:              1.0000E-05
+   Central mass:                    4.3000E+06 solar masses
+   J_2:                              0.0000E+00
+   J_4:                              0.0000E+00
+   J_6:                              0.0000E+00
+   Ejection distance:               2.0000E+06 AU
+   Radius of central body:          8.6000E-02 AU
+
+   Includes collisions:                 yes
+   Includes fragmentation:              no 
+   Includes relativity:                 no 
+   Includes user-defined force routine: yes
+
+   Number of Big bodies:        1
+   Number of Small bodies:      1
+
+
+           Integration details
+           -------------------
+
+   Initial energy:           -1.12726E+01 solar masses AU^2 day^-2 
+   Initial angular momentum:  1.10412E+04 solar masses AU^2 day^-1 
+
+   Integrating massive bodies and particles up to the same epoch.
+
+   Beginning the main integration.
+
+ TEST_PAR ejected at         27.3785079 years

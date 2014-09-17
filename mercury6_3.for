@@ -253,35 +253,23 @@ c Input/Output
       real*8 time,jcen(3),m(nbod),x(3,nbod),v(3,nbod),a(3,nbod)
 c
 c Local
-      integer j
-      real*8 r2, r, mBg, mOnePc, rOnePc, alpha
+      integer i, j, rinf
+      real*8 radr, rsq,  mnsd, prfk
 c
-c     PC in AU
-      rOnePc = 206264.81
-c
-c     Mass within 1 pc [units of solar mass]
-      mOnePc = 1.e1
-c      
-c     Power-law density profile index (BW = 1.75)
-      alpha = 1.75
-c------------------------------------------------------------------------------
-c
-      do j = 2, nbod
-
-        r2 = x(1,j)*x(1,j) + x(2,j)*x(2,j) +x(3,j)*x(3,j)
-        r = sqrt(r2)
-
-        mBg = mOnePc * (r / rOnePc) ** (3. - alpha)
-C        
-c     Convert to GM         
-        mBg = mBg*K2
-
-        a(1,j) = - mBg / r2 / r * x(1,j)
-        a(2,j) = - mBg / r2 / r * x(2,j)
-        a(3,j) = - mBg / r2 / r * x(3,j)
+      prfk = 3.927369e5
+C       prfk = 15 (m<1pc) 3^(1/4) / 16 pi
+C            = 0.39273690869283049242484 * (m<1pc)
+      rinf = 618794
+c          = 3 pc in AU
+      do j = 1, nbod
+        rsq = x(1,j)**2 + x(2,j)**2 + x(3,j)**2
+        radr = sqrt(rsq)
+C             probably unnecessary but just in case
+        mnsd = K2*(16.0/5.0)*prfk*PI*((radr/rinf)**(5.0/4.0))
+        do i=1,3
+          a(i,j) = (-mnsd/rsq)*(x(i,j)/radr)
+        end do
       end do
-c
-c------------------------------------------------------------------------------
 c
       return
       end
