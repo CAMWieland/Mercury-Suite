@@ -254,29 +254,32 @@ c Input/Output
 c
 c Local
       integer i, j
-      real*8 radr, mnsd, rinf, prfk, cvac, fgr1(3), fgr2(3), fgr3(3)
-      real*8 fgr(3), radv, eta, kL, fgrpx
+C       real*8 radr, mnsd, rinf, prfk, cvac, fgr1(3), fgr2(3), fgr3(3)
+C       real*8 fgr(3), radv, eta, kL, fgrpx
 c
-      prfk = 3.927369e5
+C       prfk = 3.927369e5
 C     prfk = 15 (m<1pc) 3^(1/4) / 16 pi
 C          = 0.39273690869283049242484 * (m<1pc)
-      rinf = 618794
+C       rinf = 618794
 c          = 3 pc in AU
-      cvac = 63198
+C       vac = 63198
 c          = the speed of light in au/year
       do j = 1, nbod
-        radr = sqrt(x(1,j)**2 + x(2,j)**2 + x(3,j)**2)
-        radv = sqrt(v(1,j)**2 + v(2,j)**2 + v(3,j)**2)
-        eta = (m(j)*m(1))/((m(1)+m(j))**2)
-        do i=1,3
-           fgrpx = -K2*(1.0+(m(j)/m(1)))/(radr**2)
-           fgr1(i) = (fgrpx/(cvac**2))*(2.0*eta-4.0)*radv*v(i,j)
-           fgr2(i) = (1.0+((3.0/2.0)*eta))*(radv**2.0)*x(i,j)/radr
-           fgr3(i) = (4.0-(2.0*eta))*fgrpx*x(i,j)
-           a(i,j) = fgr1(i) + fgr2(i) + fgr3(i)
-        end do
+C         radr = sqrt(x(1,j)**2 + x(2,j)**2 + x(3,j)**2)
+C         radv = sqrt(v(1,j)**2 + v(2,j)**2 + v(3,j)**2)
+C         eta = (m(j)*m(1))/((m(1)+m(j))**2)
+C         do i=1,3
+C            fgrpx = -K2*(1.0+(m(j)/m(1)))/((cvac**2)(radr**2))
+C            fgr1(i) = (2.0*eta-4.0)*radv*v(i,j)
+C            fgr2(i) = (1.0+(3.0*eta/2.0))*(radv**2.0)*x(i,j)/radr
+C            fgr3(i) = -(4.0+(2.0*eta))*fgrpx*(cvac**2)*x(i,j)/radr
+C            a(i,j) = fgrpx*(fgr1(i) + fgr2(i) + fgr3(i))
+C         end do
+C       end do
+      a(1,j) = 0.d0
+      a(2,j) = 0.d0
+      a(3,j) = 0.d0
       end do
-c
       return
       end
 c
