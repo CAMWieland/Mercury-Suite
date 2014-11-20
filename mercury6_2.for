@@ -1,6 +1,6 @@
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 c
-c      MERCURY6_3.FOR   (UPDATED FROM VERSION 6_2 OF 3 MAY 2002)
+c      MERCURY6_1.FOR    (ErikSoft   3 May 2002)
 c
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 c
@@ -9,24 +9,6 @@ c
 c Mercury is a general-purpose N-body integration package for problems in
 c celestial mechanics.
 c
-c******************************************************************************
-c CHANGES IN VERSION 6_3 (21 June 2008)
-c******************************************************************************
-c
-c Author: Karla de Souza Torres
-c
-c The variable array STAT is now explicitly initialized each time the 
-c integrator (re-)starts. This prevents STAT from getting random values, 
-c independently of compiler. The STAT variable is responsible for flagging 
-c bodies to be deleted after events, and its non-initialization caused bodies
-c to disappear in a non-physical manner in some cases.
-c
-c The alteration is made in the subroutine mio_in and is labelled with ##K##.
-c
-c Please, send your comments to karlchen79@gmail.com
-c
-c******************************************************************************
-c------------------------------------------------------------------------------
 c------------------------------------------------------------------------------
 c This package contains some subroutines taken from the Swift integration 
 c package by H.F.Levison and M.J.Duncan (1994) Icarus, vol 108, pp18.
@@ -243,76 +225,27 @@ c N.B. All coordinates and velocities must be with respect to central body
 c ===
 c------------------------------------------------------------------------------
 c
-      subroutine mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,rho,rcen)
+      subroutine mfo_user (time,jcen,nbod,nbig,m,x,v,a)
 c
       implicit none
       include 'mercury.inc'
-c THIS IS THE COPY
+c
 c Input/Output
-      integer nbod,nbig
+      integer nbod, nbig
       real*8 time,jcen(3),m(nbod),x(3,nbod),v(3,nbod),a(3,nbod)
-      real*8 s(3,nbod),rho(nbod),rcen
-C       for reasons known to none, rcen is an integer.
 c
 c Local
-      integer i, j
-      real*8 radr, mnsd, rinf, prfk, cvac, fgr1(3), fgr2(3), fgr3(3)
-      real*8 fgr(3), fT(3), fR(3), radv, objR, OmgCt
-      real*8 Omg(3), eta, kL, fgrpx
+      integer j
 c
-      prfk = 3.927369E5
-C     prfk = 15 (m<1pc) 3^(1/4) / 16 pi
-C          = 0.39273690869283049242484 * (m<1pc)
-      rinf = 618794
-c          = 3 pc in AU
-      cvac = 63198
-C          = the speed of light in AU/year
-      do i=1,3
-        Omg(i) = s(i,1)/((2.0/5.0)*m(1)*(rcen**2))
-c       convert angular momentum vector to omega by / by M. of Inertia tensor
-      end do
-      OmgCt = sqrt(Omg(1)**2 + Omg(2)**2 + Omg(3)**2)
+c------------------------------------------------------------------------------
+c
       do j = 1, nbod
-        radr = sqrt(x(1,j)**2 + x(2,j)**2 + x(3,j)**2)
-        radv = sqrt(v(1,j)**2 + v(2,j)**2 + v(3,j)**2)
-C         equivalent to A-M line 271/272. 
-C         radv is (confusingly) |v|, not just the radial component of v.
-c      mnsd = K2*(16.0/5.0)*prfk*PI*((radr/rinf)**(5.0/4.0))
-C         AM and I are equivalent up to here/AM277, assuming 
-C         mOnePc~1E6 and prfk~2.52E4 [M_Sun]
-        eta = (m(j)*m(1))/((m(1)+m(j))**2)
-C         CALL RANDOM_SEED()
-C         CALL RANDOM_NUMBER(kL)
-C         kL = (kL*0.045)+0.005
-        kL = .3
-        objR = (((3.0/4.0)*(MSUN*m(j))/(PI*rho(j)))**(1.0/3.0))/AU
-c       because the units here are idiotic, I have to convert m to g to get r
-c       in cm, then convert cm back to AU. this seemed the simplest way to.
-        do i=1,3
-C           a(i,j) = (-mnsd/(radr**2))*(x(i,j)/radr)
-C           
-c  Now adding the GR perturbation to the potential. For derivation, c.f. 
-c  http://www.geo.brown.edu/classes/geol1950g/Bonadonna.April29.Summary.pdf
-c  and
-c  Seager, Sara, and Renee Dotson. "Non-Keplerian Dynamics of Exoplanets."
-c  Exoplanets. Tucson: U of Arizona, 2010. 217-38. Print.
-          fgrpx = -K2*(1.0 + (m(j)/m(1)))/(radr**2.0)
-          fgr1(i) = (fgrpx/(cvac**2))*(2.0*eta - 4.0)*radv*v(i,j)
-          fgr2(i) = (1.0+((3.0/2.0)*eta))*(radv**2.0)*x(i,j)/radr
-          fgr3(i) = (4.0-(2.0*eta))*fgrpx*x(i,j)
-          fgr(i) = fgr1(i) + fgr2(i) + fgr3(i)
-c  these are the different portions of the very long gr perterbation eq.          
-C  note that we redefine this each pass through the loop, rather than saving
-C  perturbations for all nbod different objects. 
-c       now gr tidal forces
-          fT(i) =3.0*kL*K2*m(1)*(objR**5.0)*x(i,j)/(m(j)*(radr**8.0))
-c  finally, in the (probably unused) case that the central BH is rotating, we
-c  add in a term for the perturbation due to stellar oblateness.
-          fR(i)=(1.0/2.0)*kL*(OmgCt**2.0)*(rcen**5.0)*x(i,j)/(radr**5.0)
-          a(i,j) =fgr(i)-fT(i)-fR(i)
-C       testing with only the GR/perturbation terms
-        end do
+        a(1,j) = 0.d0
+        a(2,j) = 0.d0
+        a(3,j) = 0.d0
       end do
+c
+c------------------------------------------------------------------------------
 c
       return
       end
@@ -1978,7 +1911,7 @@ c
 c Input/Output
       integer nbod,nbig,ngflag,opt(8)
       real*8 time,jcen(3),h,m(nbod),x(3,nbod),v(3,nbod),xh(3,nbod)
-      real*8 vh(3,nbod),ngf(4,nbod),a(3,nbod),s(3,nbod),rho(nbod),rcen
+      real*8 vh(3,nbod),ngf(4,nbod)
 c
 c Local
       integer j,k,iflag,stat(NMAX)
@@ -2031,8 +1964,8 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,xh,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-     %    rho,rcen)
+        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,xh,vh,
+     %    ausr)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,xh,vh,angf,
      %    ngf)
 c
@@ -2060,8 +1993,8 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,xh,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-     %    rho,rcen)
+        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,xh,vh,
+     %    ausr)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,xh,vh,angf,
      %    ngf)
 c
@@ -2290,7 +2223,7 @@ c
 c Input/Output
       integer nbod,nbig,ngflag,opt(8)
       real*8 time,jcen(3),h,m(nbod),xh(3,nbod),vh(3,nbod),x(3,nbod)
-      real*8 v(3,nbod),ngf(4,nbod),s(3,nbod),rho(nbod),rcen
+      real*8 v(3,nbod),ngf(4,nbod)
 c
 c Local
       integer j,k,iflag,stat(NMAX)
@@ -2342,8 +2275,7 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,x,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-     %    rho,rcen)
+        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,ausr)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
         do j = 2, nbod
@@ -2370,8 +2302,7 @@ c Advance Interaction Hamiltonian
         call mfo_mvs (jcen,nbod,nbig,m,x,xj,a,stat)
 c
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-     %    rho,rcen)
+        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,ausr)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
         do j = 2, nbod
@@ -3467,7 +3398,7 @@ c Input/Output
       real*8 time,tstart,h0,tol,rmax,en(3),am(3),jcen(3),rcen
       real*8 m(nbod),x(3,nbod),v(3,nbod),s(3,nbod),rphys(nbod)
       real*8 rce(nbod),rcrit(nbod),ngf(4,nbod),tclo(CMAX),dclo(CMAX)
-      real*8 ixvclo(6,CMAX),jxvclo(6,CMAX),rho(nbod)
+      real*8 ixvclo(6,CMAX),jxvclo(6,CMAX)
       character*80 outfile(3),mem(NMESS)
       character*8 id(nbod)
 c
@@ -3498,8 +3429,7 @@ c If accelerations from previous call are not valid, calculate them now
           ausr(3,j) = 0.d0
         end do
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-     %    rho,rcen)
+        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,ausr)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
       end if
 c
@@ -3583,8 +3513,7 @@ c
 c
 c Advance interaction Hamiltonian for H/2
       call mfo_hy (jcen,nbod,nbig,m,x,rcrit,a,stat)
-      if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-     %  rho,rcen)
+      if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,ausr)
       if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
       do j = 2, nbod
@@ -3783,7 +3712,7 @@ c Input/Output
       real*8 time,tstart,h0,tol,rmax,en(3),am(3),jcen(3),rcen
       real*8 m(nbod),x(3,nbod),v(3,nbod),s(3,nbod),rphys(nbod)
       real*8 rce(nbod),rcrit(nbod),ngf(4,nbod),tclo(CMAX),dclo(CMAX)
-      real*8 ixvclo(6,CMAX),jxvclo(6,CMAX),rho(nbod)
+      real*8 ixvclo(6,CMAX),jxvclo(6,CMAX)
       character*80 outfile(3),mem(NMESS)
       character*8 id(nbod)
 c
@@ -3819,8 +3748,7 @@ c
           ausr(3,j) = 0.d0
         end do
 c If required, apply non-gravitational and user-defined forces
-        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-      %   rho,rcen)
+        if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,ausr)
         if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
       end if
 c
@@ -3856,8 +3784,7 @@ c Check for close-encounter minima during drift step
 c
 c Advance interaction Hamiltonian for H/2
       call mfo_mvs (jcen,nbod,nbig,m,x,xj,a,stat)
-      if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,
-     %  rho,rcen)
+      if (opt(8).eq.1) call mfo_user (time,jcen,nbod,nbig,m,x,v,ausr)
       if (ngflag.eq.1.or.ngflag.eq.3) call mfo_ngf (nbod,x,v,angf,ngf)
 c
       do j = 2, nbod
@@ -4268,7 +4195,7 @@ c
 c Input/Output
       integer nbod,nbig,ngflag,stat(nbod),opt(8),nce,ice(nce),jce(nce)
       real*8 time,jcen(3),m(nbod),x(3,nbod),v(3,nbod),s(3,nbod)
-      real*8 a(3,nbod),ngf(4,nbod),rcrit(nbod),rho(nbod),rcen
+      real*8 a(3,nbod),ngf(4,nbod),rcrit(nbod)
 c
 c Local
       integer j
@@ -4321,7 +4248,7 @@ c Include post-Newtonian corrections if required
 c
 c Include user-defined accelerations if required
       if (opt(8).eq.1) then
-        call mfo_user (time,jcen,nbod,nbig,m,x,v,a,s,rho,rcen)
+        call mfo_user (time,jcen,nbod,nbig,m,x,v,acor)
         do j = 2, nbod
           a(1,j) = a(1,j) + acor(1,j)
           a(2,j) = a(2,j) + acor(2,j)
@@ -6182,18 +6109,6 @@ c Error reading epoch of Big bodies
 c
 c------------------------------------------------------------------------------
 c
-c------------------------------------------------------------------------------
-c ##K##
-c Always initialize the variable array STAT for all bodies with 0.
-c------------------------------------------------------------------------------
-
-      do j = 2, nbod
-        stat(j) = 0
-      end do
-
-c------------------------------------------------------------------------------
-c ##K##
-c------------------------------------------------------------------------------
       end
 c
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7141,6 +7056,7 @@ c
       do j = 1, nsml
         rho(j+nbig) = rtemp(indx(j))
       end do
+c
       do j = 1, nsml
         ctemp(j) = id(j+nbig)
         jtemp(j) = stat(j+nbig)

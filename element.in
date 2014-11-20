@@ -7,7 +7,7 @@
  xv.out
 )---------------------------------------------------------------------
  type of elements (central body, barycentric, Jacobi) = Cen
- minimum interval between outputs (days) = 100
+ minimum interval between outputs (days) = 1
  express time in days or years = years
  express time relative to integration start time = yes
 )---------------------------------------------------------------------

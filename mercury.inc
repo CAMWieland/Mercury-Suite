@@ -39,5 +39,8 @@ c
       parameter (PIBY2 = PI * .5d0)
       parameter (DR = PI / 180.d0)
       parameter (K2 = 2.959122082855911d-4)
+c k2 above is quoted in terms of AU^3 / day^2. not sure if that matters for time in units of
+c years, which gives you 39.42, below, for the solar system.
+c      parameter (K2 = 39.42d2)
       parameter (AU = 1.4959787e13)
       parameter (MSUN = 1.9891e33)
