@@ -258,35 +258,23 @@ c Local
       real*8 fgr(3), radv, eta, kL, fgrpx
 c
       prfk = 3.927369e5
-c     prfk = 15 (m<1pc) 3^(1/4) / 16 pi
-c          = 0.39273690869283049242484 * (m<1pc)
+C     prfk = 15 (m<1pc) 3^(1/4) / 16 pi
+C          = 0.39273690869283049242484 * (m<1pc)
       rinf = 618794
 c          = 3 pc in AU
-      cvac = 173.1446326742403
-c          = the speed of light in AU/day
+      cvac = 63198
+c          = the speed of light in au/year
       do j = 1, nbod
         radr = sqrt(x(1,j)**2 + x(2,j)**2 + x(3,j)**2)
         radv = sqrt(v(1,j)**2 + v(2,j)**2 + v(3,j)**2)
         eta = (m(j)*m(1))/((m(1)+m(j))**2)
-        mnsd = K2*(16.0/5.0)*prfk*PI*((radr/rinf)**(5.0/4.0))
-C            = mass inside a sphere with bahcall-wolf profile
         do i=1,3
            fgrpx = -K2*(1.0+(m(j)/m(1)))/((cvac**2)*(radr**2))
            fgr1(i) = (2.0*eta-4.0)*radv*v(i,j)
            fgr2(i) = (1.0+(3.0*eta/2.0))*(radv**2.0)*x(i,j)/radr
            fgr3(i) = -(4.0+(2.0*eta))*fgrpx*(cvac**2)*x(i,j)/radr
-           a(i,j) = 192*fgrpx*(fgr1(i) + fgr2(i) + fgr3(i))
-C          sans the 192 prefactor, this is the 0th order numerical
-C          relativistic correction to the force: c.f.:
-C          Fabrycky, Daniel C. "Non-Keplerian Dynamics of Exoplanets."
-C            Exoplanets. By Sara Seager and Renée Dotson. Tucson: 
-C            U of Arizona, 2010. 217-38. Print.
-           a(i,j) = a(i,j) - (mnsd/(radr**2))*(x(i,j)/radr)
-
+           a(i,j) = fgrpx*(fgr1(i) + fgr2(i) + fgr3(i))
         end do
-c       a(1,j) = fgrpx*(fgr1(1) + fgr2(1) + fgr3(1))
-c       a(2,j) = fgrpx*(fgr1(2) + fgr2(2) + fgr3(2))
-c       a(3,j) = fgrpx*(fgr1(3) + fgr2(3) + fgr3(3))
       end do
 c
 c------------------------------------------------------------------------------
